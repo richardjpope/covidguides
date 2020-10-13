@@ -136,12 +136,16 @@ class CovidDocs(object):
                         previous_files, key=os.path.getctime)
                     current_hash = ""
                     with open(most_recent_file_path) as current:
-                        significant_change = check_significant_change(
-                            current.read(), scraped_page.text)
+                        changes = get_changes(current.read(), scraped_page.text)
+                        # significant_change = check_significant_change(
+                        #     current.read(), scraped_page.text)
 
-                    if significant_change:
+                    if not changes == []:
                         save = True
                         stats["updated count"] += 1
+                        print("Changes:")
+                        print(changes)
+                        print("--------------------")
 
                 if save:
                     file_name = scraped_time.strftime("%Y-%m-%dT%H:%M:%S.html")
