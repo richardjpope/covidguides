@@ -206,7 +206,34 @@ class CovidDocs(object):
         feed_html += "</body></html>"
         save_file("docs/feed.html", feed_html)
 
-    def syncurls(self):
+    def _syncurls_govuk_html_guides(self):
+
+        new_urls = []
+        current_urls = []
+
+        with open('urls.csv') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                current_urls.append(row[0])
+            csvfile.close()
+
+        for url in current_urls:
+            if "/government/publications/" in url and "www.gov.uk" in url:
+                r = requests.get(url)
+                soup = BeautifulSoup(r.text, features="html.parser")
+                for meta in soup.select(".metadata .type"):
+                    if meta.string == "HTML":
+                        link = meta.parent.parent.find('a')
+                        url = "https://www.gov.uk%s" % link.get('href')
+                        if not url in current_urls and url not in new_urls:
+                            new_urls.append(url)
+
+        with open('urls.csv', mode='a+') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for url in new_urls:
+                csvwriter.writerow([url])
+
+    def _syncurls_govuk(self):
 
         # Read in existing urls from file
         current_urls = []
@@ -218,6 +245,7 @@ class CovidDocs(object):
                 current_urls.append(row[0])
             csvfile.close()
 
+        ## get pages from the gov.uk search api
         page = 0
         more_pages = True
         while more_pages:
@@ -237,11 +265,17 @@ class CovidDocs(object):
             else:
                 page += 1
 
+        # try and find the urls for html guides if they exist
+        # government/publications/
+
         with open('urls.csv', mode='a+') as csvfile:
           csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
           for url in new_urls:
             csvwriter.writerow([url])
 
+    def syncurls(self):
+        self._syncurls_govuk()
+        self._syncurls_govuk_html_guides()
 
 if __name__ == '__main__':
     fire.Fire(CovidDocs)
