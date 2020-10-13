@@ -60,10 +60,10 @@ def file_get_datetime(file_path):
 
 
 def check_significant_change(html1, html2):
-    if len(get_changes(html1, html2)) > 0:
-        return True
-    else:
+    if get_changes(html1, html2) == []:
         return False
+    else:
+        return True
 
 
 def clean_html(html):
@@ -228,7 +228,7 @@ class CovidDocs(object):
                     new_urls.append(url)
 
             max_page = int(results['total'])
-            if page == max_page:
+            if page > max_page:
                 more_pages = False
             else:
                 page += 1
