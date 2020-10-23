@@ -229,7 +229,7 @@ class CovidDocs(object):
                             new_urls.append(url)
 
         with open('urls.csv', mode='a+') as csvfile:
-            csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             for url in new_urls:
                 csvwriter.writerow([url])
 
